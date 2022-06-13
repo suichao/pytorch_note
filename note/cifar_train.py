@@ -81,7 +81,9 @@ for epoch in range(max_epoch):
     writer.add_scalar("train epoch loss", train_sum_loss, epoch)
 
     # test the data
+    # eval() 固定模型随机项， 固定dropout和归一化层，否则每次推理会生成不同的结果
     my_model.eval()
+    # 使用torch.no_grad(),不记录前向时用于计算梯度的信息，不然会累积的信息会导致内存增加
     with torch.no_grad():
         test_sum_loss = 0
         predict_right_cnt = 0
