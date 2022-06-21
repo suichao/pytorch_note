@@ -14,3 +14,19 @@ print(y)
 
 sigmoid在深度学习应用较少，主要是由于函数求导之后，从图像来看左右两端趋向零，不利于梯度更新，容易出现梯度消失
 """
+
+import torch
+import torch.nn as nn
+import matplotlib.pyplot as plt
+
+
+x = torch.linspace(-6, 6, 100)
+# sigmoid激活函数
+sigmoid = nn.Sigmoid()
+ysigmoid = sigmoid(x)
+
+
+plt.plot(x.data.numpy(), ysigmoid.data.numpy(), "r-")
+plt.title("Sigmoid")
+plt.grid()
+plt.show()
