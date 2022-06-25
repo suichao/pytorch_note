@@ -1,5 +1,15 @@
 import torch
 from torch import nn
+"""
+Dilate Gated Convolutional Neural Network 膨胀门卷积神经网络
+https://spaces.ac.cn/archives/5409
+
+门结构：
+Y=Conv1D1(X)⊗σ(Conv1D2(X))
+
+加上残差结构：
+Y=X+Conv1D1(X)⊗σ(Conv1D2(X))
+"""
 
 
 class ResidualDgCnn(nn.Module):
@@ -10,7 +20,7 @@ class ResidualDgCnn(nn.Module):
         self.conv1 = nn.Conv1d(hidden_dim, 2 * hidden_dim, kernel_size=kernel_size, dilation=dilation_rate,
                                padding=dilation_rate)
         self.linear = nn.Linear(hidden_dim, hidden_dim)
-        self.norm_layer = nn.LayerNorm()
+        self.norm_layer = nn.LayerNorm(hidden_dim)
         self.A = nn.Parameter(torch.zeros(1))
 
     def forward(self, inputs):
