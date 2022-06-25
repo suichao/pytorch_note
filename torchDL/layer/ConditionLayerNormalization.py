@@ -4,6 +4,9 @@ from torch import Tensor
 
 
 class ConditionLayerNormalization(nn.Module):
+    """
+    自适应层归一化
+    """
     def __init__(self, condition_hidden_size, hidden_size, eps=1e-12):
         super(ConditionLayerNormalization, self).__init__()
         self.hidden_size = hidden_size

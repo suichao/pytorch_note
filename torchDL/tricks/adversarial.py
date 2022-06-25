@@ -146,7 +146,6 @@ class VAT():
     @staticmethod
     def adv_project(grad, norm_type='inf', eps=1e-6):
         """
-        L0,L1,L2正则，对于扰动计算
         """
         if norm_type == 'l2':
             direction = grad / (torch.norm(grad, dim=-1, keepdim=True) + eps)
