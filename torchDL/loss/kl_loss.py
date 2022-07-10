@@ -1,3 +1,60 @@
+import numpy as np
+import sys
+import torch
+
+def has_modules(modulename):
+    has_flag = False
+    if modulename in sys.modules:
+        has_flag = True
+    if not has_flag:
+        print('You have not imported the {} module'.format(modulename))
+    return has_flag
+
+
+class Loss(object):
+    def __init__(self):
+        self.input_type = None
+
+    def compatible_input(self, inputs):
+        if has_modules("torch"):
+            if isinstance(inputs, torch.Tensor):
+                inputs = inputs.numpy()
+                self.input_type = "torch"
+        if has_modules("tensorflow"):
+            if isinstance(inputs, torch.Tensor):
+                inputs = inputs.numpy()
+                self.input_type = "tensorflow"
+        if isinstance(inputs, list):
+            inputs = np.array(inputs)
+            self.input_type = "list"
+        return inputs
+
+    def convert(self, inputs):
+        if self.input_type == 'torch':
+            import torch
+            inputs = torch.tensor(inputs)
+        elif self.input_type == 'tensorflow':
+            import tensorflow
+            inputs = tensorflow.convert_to_tenser(inputs)
+        elif self.input_type == 'list':
+            inputs = inputs.tolist()
+        return inputs
+
+    def call(self, x, y):
+        x = self.compatible_input(x)
+        y = self.compatible_input(y)
+        loss_v = self.compute_loss([x, y])
+        loss_v = self.convert(loss_v)
+        self.input_type = None
+        return loss_v
+
+    def compute_loss(self, inputs):
+        raise NotImplementedError
+
+
+
+
+
 """
 相对熵(relative entropy)又称为KL散度（Kullback-Leibler divergence）
 用于衡量一个分布相对于另一个分布的差异性，差异越小，kl散度为0，否则为1。
@@ -12,10 +69,9 @@ KL散度=交叉熵-熵
 对于给定训练集，熵是已知的，那么求取KL散度等价于求取交叉熵，因此交叉熵才被用作代价函数
 """
 
-import numpy as np
-import scipy.stats
 
 '''
+import scipy.stats
 # 随机生成两个离散型分布
 x = [np.random.randint(1, 11) for _ in range(10)]
 px = x / np.sum(x)
@@ -34,7 +90,22 @@ print(KL)
 '''
 
 
-def kl_loss(py, px):
-    kl = sum(px * np.log(px / py))
-    return kl
+class KL_loss(Loss):
+    def __init__(self):
+        super(KL_loss, self).__init__()
 
+    def compute_loss(self, inputs):
+        py, px = inputs[0], inputs[1]
+        kl = sum(px * np.log(px / py))
+        return kl
+
+loss = KL_loss()
+x = [np.random.randint(1, 11) for _ in range(10)]
+px = x / np.sum(x)
+px = px.tolist()
+y = [np.random.randint(1, 11) for _ in range(10)]
+py = y / np.sum(y)
+py = py.tolist()
+res = loss.call(px, py)
+print(res)
+print(type(res))
