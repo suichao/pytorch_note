@@ -17,6 +17,11 @@ class ResidualDgCnn(nn.Module):
     def __init__(self, hidden_dim, kernel_size, dilation_rate):
         super(ResidualDgCnn, self).__init__()
         self.hidden_dim = hidden_dim
+        # in_channels 输入信号通道（在文本分类中，即为词向量的维度），
+        # out_channels 输出信号通道（有多少个out_channels，就需要多少个1维卷积），
+        # kernel_size
+        # stride 步长（embedding_dim维度上卷积），
+        # dilation_rate 膨胀率
         self.conv1 = nn.Conv1d(hidden_dim, 2 * hidden_dim, kernel_size=kernel_size, dilation=dilation_rate,
                                padding=dilation_rate)
         self.linear = nn.Linear(hidden_dim, hidden_dim)

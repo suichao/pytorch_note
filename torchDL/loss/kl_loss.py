@@ -1,4 +1,5 @@
 """
+相对熵(relative entropy)又称为KL散度（Kullback-Leibler divergence）
 用于衡量一个分布相对于另一个分布的差异性，差异越小，kl散度为0，否则为1。
 模型训练使用kl散度作为损失，使得一个分布逼近另一个分布；
 熵的定义式：
