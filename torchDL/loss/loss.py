@@ -9,12 +9,15 @@ def has_modules(modulename):
     return has_flag
 
 
-class Loss(object):
+class LossBase(object):
     """
     Loss基类
     """
     def __init__(self):
         self.input_type = None
+
+    def __call__(self, *args, **kwargs):
+        return self.call(*args, **kwargs)
 
     def compatible_input(self, inputs):
         if has_modules("torch"):
@@ -43,19 +46,19 @@ class Loss(object):
             inputs = inputs.tolist()
         return inputs
 
-    def call(self, x, y):
-        x = self.compatible_input(x)
-        y = self.compatible_input(y)
-        loss_v = self.compute_loss([x, y])
+    def call(self, predict, label):
+        predict = self.compatible_input(predict)
+        label = self.compatible_input(label)
+        loss_v = self.compute_loss(predict, label)
         loss_v = self.convert(loss_v)
         self.input_type = None
         return loss_v
 
-    def compute_loss(self, inputs):
+    def compute_loss(self, predict, label):
         raise NotImplementedError
 
 
-class KlLoss(Loss):
+class KlLoss(LossBase):
     """
     相对熵(relative entropy)又称为KL散度（Kullback-Leibler divergence）
     用于衡量一个分布相对于另一个分布的差异性，差异越小，kl散度为0，否则为1。
@@ -68,9 +71,7 @@ class KlLoss(Loss):
     将定义式张开，从熵的角度看kl散度：
     KL散度=交叉熵-熵
     对于给定训练集，熵是已知的，那么求取KL散度等价于求取交叉熵，因此交叉熵才被用作代价函数
-    """
 
-    '''
     import scipy.stats
     # 随机生成两个离散型分布
     x = [np.random.randint(1, 11) for _ in range(10)]
@@ -87,11 +88,32 @@ class KlLoss(Loss):
     for i in range(10):
         KL += px[i] * np.log(px[i] / py[i])
     print(KL)
-    '''
-    def compute_loss(self, inputs):
-        py, px = inputs[0], inputs[1]
-        kl = sum(px * np.log(px / py))
+    """
+    def compute_loss(self, predict, label):
+        predict = predict.flatten()
+        label = label.flatten()
+        kl = sum(label * np.log(label / predict))
         return kl
 
 
-loss = KlLoss()
+class CrossEntropyLoss(LossBase):
+    """
+    交叉熵
+    p(x)常用于描述样本的真实分布，例如[1,0,0,0]表示样本属于第一类，而q(x)则常常用于表示预测的分布，例如[0.7,0.1,0.1,0.1]
+    """
+    def compute_loss(self, predict, label):
+        predict = predict.flatten()
+        label = label.flatten()
+        return - sum(label * np.log(predict))
+
+
+class BinaryCrossEntropyLoss(LossBase):
+    """
+    二元交叉熵
+    p(x)常用于描述样本的真实分布，例如[1,0,0,0]表示样本属于第一类，而q(x)则常常用于表示预测的分布，例如[0.7,0.1,0.1,0.1]
+    """
+    def compute_loss(self, predict, label):
+        predict = predict.flatten()
+        label = label.flatten()
+        return sum((1 - label) * np.log((1 - predict)) - label * np.log(predict))
+
