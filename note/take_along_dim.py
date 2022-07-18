@@ -4,6 +4,9 @@ a=torch.rand(2,3,4)
 b=torch.rand(2,3,4)
 indices=torch.max(a,1,keepdim=True)[1]
 b_max = torch.take_along_dim(b,indices,dim=1)
+print(a)
+print(b)
+print(b_max)
 
 a=torch.rand(2,3)
 print(a)
