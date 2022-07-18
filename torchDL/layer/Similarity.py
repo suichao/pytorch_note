@@ -6,7 +6,9 @@ import math
 
 
 class CosineSimilarity(nn.Module):
-
+    """
+    余弦相似度
+    """
     def forward(self, tensor_1, tensor_2):
         normalized_tensor_1 = tensor_1 / tensor_1.norm(dim=-1, keepdim=True)
         normalized_tensor_2 = tensor_2 / tensor_2.norm(dim=-1, keepdim=True)
